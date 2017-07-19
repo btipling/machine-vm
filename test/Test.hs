@@ -3,6 +3,7 @@ module Main where
 import qualified Data.Bits     as Bits
 import qualified Data.List     as List
 import qualified Machine.Chips as Chips
+import qualified System.Exit   as Exit
 import qualified Test.HUnit    as HUnit
 
 testTwoInputGate :: String -> (Bool -> Bool -> Bool) -> [(Int, Int, Int)] -> HUnit.Test
@@ -44,11 +45,15 @@ testChipsXor :: HUnit.Test
 testChipsXor = testTwoInputGate "Xor" Chips.xor [(0, 0, 0)
                                                 ,(1, 0, 1)
                                                 ,(0, 1, 1)
-                                                ,(1, 1, 0)]
+                                                ,(1, 1, 1)]
 
 main :: IO HUnit.Counts
-main = HUnit.runTestTT $ HUnit.TestList [testChipsNand
+main = do
+    result <- HUnit.runTestTT $ HUnit.TestList [testChipsNand
                                         ,testChipsAnd
                                         ,testChipsNot
                                         ,testChipsOr
                                         ,testChipsXor]
+    if (HUnit.failures result) > 0
+        then Exit.exitWith $ Exit.ExitFailure 1
+        else return result
