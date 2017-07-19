@@ -6,11 +6,11 @@ import qualified Test.HUnit    as HUnit
 
 testGatesNand :: HUnit.Test
 testGatesNand = let
-    values = [((0, 0), 1),
-              ((1, 0), 1),
-              ((0, 1), 1),
-              ((1, 1), 0)]
-    result = List.find (\(vals, expectedOutcome) -> (Gates.nand vals) /= expectedOutcome) values
+    values = [(0, 0, 1),
+              (1, 0, 1),
+              (0, 1, 1),
+              (1, 1, 0)]
+    result = List.find (\(a, b, expectedOutcome) -> (Gates.nand a b) /= expectedOutcome) values
     in (HUnit.TestCase $ HUnit.assertEqual "Nand should validate" Nothing result)
 
 main :: IO HUnit.Counts
