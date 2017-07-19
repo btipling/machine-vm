@@ -57,14 +57,14 @@ testChipsMux = testThreeInputGate "Mux" Chips.mux [(0, 0, 0, 0)
                                                   ,(1, 0, 1, 0)
                                                   ,(1, 1, 1, 1)]
 
-main :: IO HUnit.Counts
+main :: IO ()
 main = do
-    result <- HUnit.runTestTT $ HUnit.TestList [testChipsNand
-                                        ,testChipsAnd
-                                        ,testChipsNot
-                                        ,testChipsOr
-                                        ,testChipsXor
-                                        ,testChipsMux]
+    result <- HUnit.runTestTT $ HUnit.TestList [testChipsNand]
+                                        -- ,testChipsAnd
+                                        -- ,testChipsNot
+                                        -- ,testChipsOr
+                                        -- ,testChipsXor
+                                        -- ,testChipsMux]
     if (HUnit.failures result) > 0
         then Exit.exitWith $ Exit.ExitFailure 1
-        else return result
+        else Exit.exitWith Exit.ExitSuccess
