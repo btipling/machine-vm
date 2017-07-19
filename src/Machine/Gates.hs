@@ -1,6 +1,6 @@
-module Machine.Gates (nand, and, or) where
+module Machine.Gates (nand, not, and, or) where
 
-import           Prelude hiding (and, or)
+import           Prelude hiding (and, not, or)
 
 nand :: Int -> Int -> Int
 nand a b | a == 0 && b == 0 = 1
@@ -8,8 +8,11 @@ nand a b | a == 0 && b == 0 = 1
          | a == 0 && b == 1 = 1
          | a == 1 && b == 1 = 0
 
+not :: Int -> Int
+not a = nand 1 a
+
 and :: Int -> Int -> Int
-and a b = nand 1 (nand a b)
+and a b = not (nand a b)
 
 or :: Int -> Int -> Int
-or a b = nand (and a (nand a b)) (and b (nand a b))
+or a b = and (nand a b) (not (and (not a) (not b)))
