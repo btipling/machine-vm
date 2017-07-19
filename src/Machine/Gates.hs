@@ -1,4 +1,4 @@
-module Machine.Gates (nand, not, and, or) where
+module Machine.Gates (nand, not, and, or, xor) where
 
 import           Prelude hiding (and, not, or)
 
@@ -15,4 +15,7 @@ and :: Int -> Int -> Int
 and a b = not (nand a b)
 
 or :: Int -> Int -> Int
-or a b = and (nand a b) (not (and (not a) (not b)))
+or a b = and (nand (and a b) (nand a b)) (not (and (not a) (not b)))
+
+xor :: Int -> Int -> Int
+xor a b = and (nand a b) (not (and (not a) (not b)))

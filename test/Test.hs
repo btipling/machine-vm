@@ -27,14 +27,22 @@ testGatesAnd = testGate "And" Gates.and [(0, 0, 0)
                                         ,(1, 0, 0)
                                         ,(0, 1, 0)
                                         ,(1, 1, 1)]
+
 testGatesOr :: HUnit.Test
 testGatesOr = testGate "Or" Gates.or [(0, 0, 0)
                                      ,(1, 0, 1)
                                      ,(0, 1, 1)
-                                     ,(1, 1, 0)]
+                                     ,(1, 1, 1)]
+
+testGatesXor :: HUnit.Test
+testGatesXor = testGate "Xor" Gates.xor [(0, 0, 0)
+                                        ,(1, 0, 1)
+                                        ,(0, 1, 1)
+                                        ,(1, 1, 0)]
 
 main :: IO HUnit.Counts
 main = HUnit.runTestTT $ HUnit.TestList [testGatesNand
                                         ,testGatesAnd
                                         ,testGatesNot
-                                        ,testGatesOr]
+                                        ,testGatesOr
+                                        ,testGatesXor]
