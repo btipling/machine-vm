@@ -4,4 +4,4 @@ import qualified Machine.Gates as Gates
 
 main :: IO ()
 main = do
-  putStrLn $ "nand: " ++ (show $ Gates.nand 0 1)
+  putStrLn $ "nand: " ++ (show $ Gates.nand (0, 1))

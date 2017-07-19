@@ -1,11 +1,17 @@
 module Main where
 
-import qualified Machine.Gates
+import qualified Data.List     as List
+import qualified Machine.Gates as Gates
 import qualified Test.HUnit    as HUnit
 
-testExample :: HUnit.Test
-testExample =
-    HUnit.TestCase $ HUnit.assertEqual "True should be True" True True
+testGatesNand :: HUnit.Test
+testGatesNand = let
+    values = [((0, 0), 1),
+              ((1, 0), 1),
+              ((0, 1), 1),
+              ((1, 1), 0)]
+    result = List.find (\(vals, expectedOutcome) -> (Gates.nand vals) /= expectedOutcome) values
+    in (HUnit.TestCase $ HUnit.assertEqual "Nand should validate" Nothing result)
 
 main :: IO HUnit.Counts
-main = HUnit.runTestTT $ HUnit.TestList [testExample]
+main = HUnit.runTestTT $ HUnit.TestList [testGatesNand]
