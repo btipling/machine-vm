@@ -18,4 +18,6 @@ or :: Int -> Int -> Int
 or a b = nand (nand a a) (nand b b)
 
 xor :: Int -> Int -> Int
-xor a b = and (or a b) (not (and a b))
+xor a b = nand (nand a (nand a b)) (nand b (nand a b))
+
+
