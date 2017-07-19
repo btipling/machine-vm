@@ -5,8 +5,8 @@ import qualified Data.List     as List
 import qualified Machine.Chips as Chips
 import qualified Test.HUnit    as HUnit
 
-testGate :: String -> (Bool -> Bool -> Bool) -> [(Int, Int, Int)] -> HUnit.Test
-testGate name gate values = let
+testTwoInputGate :: String -> (Bool -> Bool -> Bool) -> [(Int, Int, Int)] -> HUnit.Test
+testTwoInputGate name gate values = let
     result = List.find (\(a, b, expectedOutcome) -> (gate (toEnum a) (toEnum b)) /= (toEnum expectedOutcome)) values
     in (HUnit.TestCase $ HUnit.assertEqual (name ++ " should validate") Nothing result)
 
@@ -18,28 +18,28 @@ testChipsNot = let
     in (HUnit.TestCase $ HUnit.assertEqual ("not should validate") Nothing result)
 
 testChipsNand :: HUnit.Test
-testChipsNand = testGate "Nand" Chips.nand [(0, 0, 1)
-                                           ,(1, 0, 1)
-                                           ,(0, 1, 1)
-                                           ,(1, 1, 0)]
+testChipsNand = testTwoInputGate "Nand" Chips.nand [(0, 0, 1)
+                                                   ,(1, 0, 1)
+                                                   ,(0, 1, 1)
+                                                   ,(1, 1, 0)]
 
 testChipsAnd :: HUnit.Test
-testChipsAnd = testGate "And" Chips.and [(0, 0, 0)
-                                        ,(1, 0, 0)
-                                        ,(0, 1, 0)
-                                        ,(1, 1, 1)]
+testChipsAnd = testTwoInputGate "And" Chips.and [(0, 0, 0)
+                                                ,(1, 0, 0)
+                                                ,(0, 1, 0)
+                                                ,(1, 1, 1)]
 
 testChipsOr :: HUnit.Test
-testChipsOr = testGate "Or" Chips.or [(0, 0, 0)
-                                     ,(1, 0, 1)
-                                     ,(0, 1, 1)
-                                     ,(1, 1, 1)]
+testChipsOr = testTwoInputGate "Or" Chips.or [(0, 0, 0)
+                                             ,(1, 0, 1)
+                                             ,(0, 1, 1)
+                                             ,(1, 1, 1)]
 
 testChipsXor :: HUnit.Test
-testChipsXor = testGate "Xor" Chips.xor [(0, 0, 0)
-                                        ,(1, 0, 1)
-                                        ,(0, 1, 1)
-                                        ,(1, 1, 0)]
+testChipsXor = testTwoInputGate "Xor" Chips.xor [(0, 0, 0)
+                                                ,(1, 0, 1)
+                                                ,(0, 1, 1)
+                                                ,(1, 1, 0)]
 
 main :: IO HUnit.Counts
 main = HUnit.runTestTT $ HUnit.TestList [testChipsNand
