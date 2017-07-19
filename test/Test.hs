@@ -9,18 +9,18 @@ testGate name gate values = let
     result = List.find (\(a, b, expectedOutcome) -> (gate a b) /= expectedOutcome) values
     in (HUnit.TestCase $ HUnit.assertEqual (name ++ " should validate") Nothing result)
 
-testGatesNand :: HUnit.Test
-testGatesNand = testGate "Nand" Gates.nand [(0, 0, 1)
-                                           ,(1, 0, 1)
-                                           ,(0, 1, 1)
-                                           ,(1, 1, 0)]
-
 testGatesNot :: HUnit.Test
 testGatesNot = let
     values = [(0, 1)
              ,(1, 0)]
     result = List.find (\(a, expectedOutcome) -> (Gates.not a) /= expectedOutcome) values
     in (HUnit.TestCase $ HUnit.assertEqual ("not should validate") Nothing result)
+
+testGatesNand :: HUnit.Test
+testGatesNand = testGate "Nand" Gates.nand [(0, 0, 1)
+                                           ,(1, 0, 1)
+                                           ,(0, 1, 1)
+                                           ,(1, 1, 0)]
 
 testGatesAnd :: HUnit.Test
 testGatesAnd = testGate "And" Gates.and [(0, 0, 0)
