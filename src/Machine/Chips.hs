@@ -2,22 +2,22 @@ module Machine.Chips (nand, not, and, or, xor) where
 
 import           Prelude hiding (and, not, or)
 
-nand :: Int -> Int -> Int
-nand a b | a == 0 && b == 0 = 1
-         | a == 1 && b == 0 = 1
-         | a == 0 && b == 1 = 1
-         | a == 1 && b == 1 = 0
+nand :: Bool -> Bool -> Bool
+nand a b | a == False && b == False = True
+         | a == True  && b == False = True
+         | a == False && b == True  = True
+         | a == True  && b == True  = False
 
-not :: Int -> Int
+not :: Bool -> Bool
 not a = nand a a
 
-and :: Int -> Int -> Int
+and :: Bool -> Bool -> Bool
 and a b = not (nand a b)
 
-or :: Int -> Int -> Int
+or :: Bool -> Bool -> Bool
 or a b = nand (not a) (not b)
 
-xor :: Int -> Int -> Int
+xor :: Bool -> Bool -> Bool
 xor a b = nand (nand a (nand a b)) (nand b (nand a b))
 
 

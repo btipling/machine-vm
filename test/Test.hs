@@ -1,19 +1,20 @@
 module Main where
 
+import qualified Data.Bits     as Bits
 import qualified Data.List     as List
 import qualified Machine.Chips as Chips
 import qualified Test.HUnit    as HUnit
 
-testGate :: String -> (Int -> Int -> Int) -> [(Int, Int, Int)] -> HUnit.Test
+testGate :: String -> (Bool -> Bool -> Bool) -> [(Int, Int, Int)] -> HUnit.Test
 testGate name gate values = let
-    result = List.find (\(a, b, expectedOutcome) -> (gate a b) /= expectedOutcome) values
+    result = List.find (\(a, b, expectedOutcome) -> (gate (toEnum a) (toEnum b)) /= (toEnum expectedOutcome)) values
     in (HUnit.TestCase $ HUnit.assertEqual (name ++ " should validate") Nothing result)
 
 testChipsNot :: HUnit.Test
 testChipsNot = let
     values = [(0, 1)
              ,(1, 0)]
-    result = List.find (\(a, expectedOutcome) -> (Chips.not a) /= expectedOutcome) values
+    result = List.find (\(a, expectedOutcome) -> (Chips.not (toEnum a)) /= (toEnum expectedOutcome)) values
     in (HUnit.TestCase $ HUnit.assertEqual ("not should validate") Nothing result)
 
 testChipsNand :: HUnit.Test
