@@ -7,14 +7,19 @@ import qualified Test.HUnit    as HUnit
 
 testTwoInputGate :: String -> (Bool -> Bool -> Bool) -> [(Int, Int, Int)] -> HUnit.Test
 testTwoInputGate name gate values = let
-    result = List.find (\(a, b, expectedOutcome) -> (gate (toEnum a) (toEnum b)) /= (toEnum expectedOutcome)) values
+    result = List.find (\(a, b, expected) -> (gate (toEnum a) (toEnum b)) /= (toEnum expected)) values
+    in (HUnit.TestCase $ HUnit.assertEqual (name ++ " should validate") Nothing result)
+
+testThreeInputGate :: String -> (Bool -> Bool -> Bool -> Bool) -> [(Int, Int, Int, Int)] -> HUnit.Test
+testThreeInputGate name gate values = let
+    result = List.find (\(a, b, c, expected) -> (gate (toEnum a) (toEnum b) (toEnum c)) /= (toEnum expected)) values
     in (HUnit.TestCase $ HUnit.assertEqual (name ++ " should validate") Nothing result)
 
 testChipsNot :: HUnit.Test
 testChipsNot = let
     values = [(0, 1)
              ,(1, 0)]
-    result = List.find (\(a, expectedOutcome) -> (Chips.not (toEnum a)) /= (toEnum expectedOutcome)) values
+    result = List.find (\(a, expected) -> (Chips.not (toEnum a)) /= (toEnum expected)) values
     in (HUnit.TestCase $ HUnit.assertEqual ("not should validate") Nothing result)
 
 testChipsNand :: HUnit.Test

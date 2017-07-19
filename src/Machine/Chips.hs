@@ -19,5 +19,3 @@ or a b = nand (not a) (not b)
 
 xor :: Bool -> Bool -> Bool
 xor a b = nand (nand a (nand a b)) (nand b (nand a b))
-
-
