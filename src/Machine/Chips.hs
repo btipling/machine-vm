@@ -1,4 +1,4 @@
-module Machine.Chips (nand, not, and, or, xor) where
+module Machine.Chips (nand, not, and, or, xor, mux) where
 
 import           Prelude hiding (and, not, or)
 
@@ -19,3 +19,6 @@ or a b = nand (not a) (not b)
 
 xor :: Bool -> Bool -> Bool
 xor a b = nand (nand a (nand a b)) (nand b (nand a b))
+
+mux :: Bool -> Bool -> Bool -> Bool
+mux a b sel = or (and (not sel) a) (and sel b)
