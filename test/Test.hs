@@ -57,14 +57,25 @@ testChipsMux = testThreeInputGate "Mux" Chips.mux [(0, 0, 0, 0)
                                                   ,(1, 0, 1, 0)
                                                   ,(1, 1, 1, 1)]
 
+testChipsDMux :: HUnit.Test
+testChipsDMux = let
+    values    = [(0, 0, (0, 0))
+                ,(0, 1, (1, 0))
+                ,(1, 0, (0, 0))
+                ,(1, 1, (0, 1))]
+    f         = \(sel, i, (a, b)) -> (Chips.dmux (toEnum sel) (toEnum i)) /= ((toEnum a), (toEnum b))
+    result    = List.find f values
+    in (HUnit.TestCase $ HUnit.assertEqual ("dmux should validate") Nothing result)
+
 main :: IO ()
 main = do
-    result <- HUnit.runTestTT $ HUnit.TestList [testChipsNand]
-                                        -- ,testChipsAnd
-                                        -- ,testChipsNot
-                                        -- ,testChipsOr
-                                        -- ,testChipsXor
-                                        -- ,testChipsMux]
+    result <- HUnit.runTestTT $ HUnit.TestList [testChipsNand
+                                               ,testChipsAnd
+                                               ,testChipsNot
+                                               ,testChipsOr
+                                               ,testChipsXor
+                                               ,testChipsMux
+                                               ,testChipsDMux]
     if (HUnit.failures result) > 0
         then Exit.exitWith $ Exit.ExitFailure 1
         else Exit.exitWith Exit.ExitSuccess

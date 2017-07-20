@@ -1,4 +1,4 @@
-module Machine.Chips (nand, not, and, or, xor, mux) where
+module Machine.Chips (nand, not, and, or, xor, mux, dmux) where
 
 import           Prelude hiding (and, not, or)
 
