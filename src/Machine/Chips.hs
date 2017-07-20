@@ -8,7 +8,8 @@ module Machine.Chips (nand
                      ,notN
                      ,andN
                      ,orN
-                     ,muxN) where
+                     ,muxN
+                     ,orNWay) where
 
 import           Prelude hiding (and, not, or)
 
@@ -61,3 +62,6 @@ orN a b = fmap (\(a', b') -> or a' b') $ zip a b
 muxN :: Bool -> [Bool] -> [Bool] -> [Bool]
 muxN sel a b | sel       = b
              | otherwise = a
+
+orNWay :: [Bool] -> Bool
+orNWay input = foldl or False input
