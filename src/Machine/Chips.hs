@@ -1,4 +1,11 @@
-module Machine.Chips (nand, not, and, or, xor, mux, dmux) where
+module Machine.Chips (nand
+                     ,not
+                     ,and
+                     ,or
+                     ,xor
+                     ,mux
+                     ,dmux
+                     ,notN) where
 
 import           Prelude hiding (and, not, or)
 
@@ -31,3 +38,10 @@ dmux sel input = let
     a = and (not sel) input
     b = and sel input
     in ((a, b))
+
+-- Haskell doesn't have fixed width arrays, just tuples which doesn't help much. Using
+-- built in arrays as a compromise. This should be a not16, but it's just a notN. This
+-- breaks the hardware simulation constraints I wanted to achieve in this instance. You
+-- can't have an endless hardware bus in real life.
+notN :: [Bool] -> [Bool]
+notN input = fmap not input
