@@ -5,7 +5,9 @@ module Machine.Chips (nand
                      ,xor
                      ,mux
                      ,dmux
-                     ,notN) where
+                     ,notN
+                     ,andN
+                     ,orN) where
 
 import           Prelude hiding (and, not, or)
 
@@ -45,3 +47,9 @@ dmux sel input = let
 -- can't have an endless hardware bus in real life.
 notN :: [Bool] -> [Bool]
 notN input = fmap not input
+
+andN :: [Bool] -> [Bool] -> [Bool]
+andN a b = fmap (\(a', b') -> and a' b') $ zip a b
+
+orN :: [Bool] -> [Bool] -> [Bool]
+orN a b = fmap (\(a', b') -> or a' b') $ zip a b
