@@ -111,6 +111,15 @@ testMuxNb = let
     result   = Chips.muxN sel a b
     in (HUnit.TestCase $ HUnit.assertEqual ("muxN should validate for a sel") b result)
 
+testOrNWay :: HUnit.Test
+testOrNWay = let
+    inputs = [([0, 1, 0, 0,    0, 1, 0, 1,    1, 1, 1, 1,    0, 1, 0, 1], 1)
+             ,([0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 1, 0, 0], 1)
+             ,([0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0], 0)]
+    f      = \(input, expected) -> (Chips.orNWay (fmap toEnum input)) /= toEnum expected
+    result = List.find f inputs
+    in (HUnit.TestCase $ HUnit.assertEqual ("orNWay should validate") Nothing result)
+
 main :: IO ()
 main = do
     result <- HUnit.runTestTT $ HUnit.TestList [testChipsNand
@@ -124,7 +133,8 @@ main = do
                                                ,testAndN
                                                ,testOrN
                                                ,testMuxNa
-                                               ,testMuxNb]
+                                               ,testMuxNb
+                                               ,testOrNWay]
     if (HUnit.failures result) > 0
         then Exit.exitWith $ Exit.ExitFailure 1
         else Exit.exitWith Exit.ExitSuccess
