@@ -67,6 +67,14 @@ testChipsDMux = let
     result    = List.find f values
     in (HUnit.TestCase $ HUnit.assertEqual ("dmux should validate") Nothing result)
 
+testNotN :: HUnit.Test
+testNotN = let
+    input    = fmap toEnum [  0, 1, 0, 0,    0, 1, 1, 1,    1, 0, 1, 0,    1, 1, 1, 1  ]
+    expected = fmap toEnum [  1, 0, 1, 1,    1, 0, 0, 0,    0, 1, 0, 1,    0, 0, 0, 0  ]
+    output   = Chips.notN input
+    result   = List.find (\(input, output) -> input /= output) (zip expected output)
+    in (HUnit.TestCase $ HUnit.assertEqual ("notN should validate") Nothing result)
+
 main :: IO ()
 main = do
     result <- HUnit.runTestTT $ HUnit.TestList [testChipsNand
@@ -75,7 +83,8 @@ main = do
                                                ,testChipsOr
                                                ,testChipsXor
                                                ,testChipsMux
-                                               ,testChipsDMux]
+                                               ,testChipsDMux
+                                               ,testNotN]
     if (HUnit.failures result) > 0
         then Exit.exitWith $ Exit.ExitFailure 1
         else Exit.exitWith Exit.ExitSuccess
