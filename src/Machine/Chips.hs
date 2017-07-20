@@ -7,7 +7,8 @@ module Machine.Chips (nand
                      ,dmux
                      ,notN
                      ,andN
-                     ,orN) where
+                     ,orN
+                     ,muxN) where
 
 import           Prelude hiding (and, not, or)
 
@@ -53,3 +54,10 @@ andN a b = fmap (\(a', b') -> and a' b') $ zip a b
 
 orN :: [Bool] -> [Bool] -> [Bool]
 orN a b = fmap (\(a', b') -> or a' b') $ zip a b
+
+-- The previous defined boolean gates don't allow any way to return anything other than a Bool
+-- A separate mechanism was needed, so falling back to Haskell. In chip designs the chip definition
+-- allows the designer mechanisms for defining imperative logic for outs not possible here.
+muxN :: Bool -> [Bool] -> [Bool] -> [Bool]
+muxN sel a b | sel       = b
+             | otherwise = a

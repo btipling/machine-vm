@@ -95,6 +95,22 @@ testOrN = let
     output    = Chips.orN a b
     in (testNInputGate "orN" output expected)
 
+testMuxNa :: HUnit.Test
+testMuxNa = let
+    sel      = toEnum 0
+    a        = fmap toEnum [  0, 1, 0, 0,    0, 1, 0, 1,    1, 1, 1, 1,    0, 1, 0, 1  ]
+    b        = fmap toEnum [  1, 1, 0, 1,    0, 0, 0, 1,    1, 0, 1, 0,    1, 1, 1, 1  ]
+    result   = Chips.muxN sel a b
+    in (HUnit.TestCase $ HUnit.assertEqual ("muxN should validate for a sel") a result)
+
+testMuxNb :: HUnit.Test
+testMuxNb = let
+    sel      = toEnum 1
+    a        = fmap toEnum [  0, 1, 0, 0,    0, 1, 0, 1,    1, 1, 1, 1,    0, 1, 0, 1  ]
+    b        = fmap toEnum [  1, 1, 0, 1,    0, 0, 0, 1,    1, 0, 1, 0,    1, 1, 1, 1  ]
+    result   = Chips.muxN sel a b
+    in (HUnit.TestCase $ HUnit.assertEqual ("muxN should validate for a sel") b result)
+
 main :: IO ()
 main = do
     result <- HUnit.runTestTT $ HUnit.TestList [testChipsNand
@@ -106,7 +122,9 @@ main = do
                                                ,testChipsDMux
                                                ,testNotN
                                                ,testAndN
-                                               ,testOrN]
+                                               ,testOrN
+                                               ,testMuxNa
+                                               ,testMuxNb]
     if (HUnit.failures result) > 0
         then Exit.exitWith $ Exit.ExitFailure 1
         else Exit.exitWith Exit.ExitSuccess
