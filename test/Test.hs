@@ -67,13 +67,33 @@ testChipsDMux = let
     result    = List.find f values
     in (HUnit.TestCase $ HUnit.assertEqual ("dmux should validate") Nothing result)
 
+testNInputGate :: String -> [Bool] -> [Bool] -> HUnit.Test
+testNInputGate name output expected = let
+    result = List.find (\(input, output) -> input /= output) (zip expected output)
+    in (HUnit.TestCase $ HUnit.assertEqual (name ++ " should validate") Nothing result)
+
 testNotN :: HUnit.Test
 testNotN = let
-    input    = fmap toEnum [  0, 1, 0, 0,    0, 1, 1, 1,    1, 0, 1, 0,    1, 1, 1, 1  ]
-    expected = fmap toEnum [  1, 0, 1, 1,    1, 0, 0, 0,    0, 1, 0, 1,    0, 0, 0, 0  ]
-    output   = Chips.notN input
-    result   = List.find (\(input, output) -> input /= output) (zip expected output)
-    in (HUnit.TestCase $ HUnit.assertEqual ("notN should validate") Nothing result)
+    input     = fmap toEnum [  0, 1, 0, 0,    0, 1, 1, 1,    1, 0, 1, 0,    1, 1, 1, 1  ]
+    expected  = fmap toEnum [  1, 0, 1, 1,    1, 0, 0, 0,    0, 1, 0, 1,    0, 0, 0, 0  ]
+    output    = Chips.notN input
+    in (testNInputGate "notN" output expected)
+
+testAndN :: HUnit.Test
+testAndN = let
+    a         = fmap toEnum [  0, 1, 0, 0,    0, 1, 0, 1,    1, 1, 1, 1,    0, 1, 0, 1  ]
+    b         = fmap toEnum [  1, 1, 0, 1,    0, 0, 0, 1,    1, 0, 1, 0,    1, 1, 0, 1  ]
+    expected  = fmap toEnum [  0, 1, 0, 0,    0, 0, 0, 1,    1, 0, 1, 0,    0, 1, 0, 1  ]
+    output    = Chips.andN a b
+    in (testNInputGate "andN" output expected)
+
+testOrN :: HUnit.Test
+testOrN = let
+    a         = fmap toEnum [  0, 1, 0, 0,    0, 1, 0, 1,    1, 1, 1, 1,    0, 1, 0, 1  ]
+    b         = fmap toEnum [  1, 1, 0, 1,    0, 0, 0, 1,    1, 0, 1, 0,    1, 1, 1, 1  ]
+    expected  = fmap toEnum [  1, 1, 0, 1,    0, 1, 0, 1,    1, 1, 1, 1,    1, 1, 1, 1  ]
+    output    = Chips.orN a b
+    in (testNInputGate "orN" output expected)
 
 main :: IO ()
 main = do
@@ -84,7 +104,9 @@ main = do
                                                ,testChipsXor
                                                ,testChipsMux
                                                ,testChipsDMux
-                                               ,testNotN]
+                                               ,testNotN
+                                               ,testAndN
+                                               ,testOrN]
     if (HUnit.failures result) > 0
         then Exit.exitWith $ Exit.ExitFailure 1
         else Exit.exitWith Exit.ExitSuccess
