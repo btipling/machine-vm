@@ -9,7 +9,9 @@ module Machine.Chips (nand
                      ,andN
                      ,orN
                      ,muxN
-                     ,orNWay) where
+                     ,orNWay
+                     ,mux4WayN
+                     ,mux8WayN) where
 
 import           Prelude hiding (and, not, or)
 
@@ -46,22 +48,41 @@ dmux sel input = let
 -- Haskell doesn't have fixed width arrays, just tuples which doesn't help much. Using
 -- built in arrays as a compromise. This should be a not16, but it's just a notN. This
 -- breaks the hardware simulation constraints I wanted to achieve in this instance. You
--- can't have an endless hardware bus in real life.
-notN :: [Bool] -> [Bool]
+-- can't have an endless hardware bus in real life. An Mpin is basically a pin array.
+type Mpin = [Bool]
+
+notN :: Mpin -> Mpin
 notN input = fmap not input
 
-andN :: [Bool] -> [Bool] -> [Bool]
+andN :: Mpin -> Mpin -> Mpin
 andN a b = fmap (\(a', b') -> and a' b') $ zip a b
 
-orN :: [Bool] -> [Bool] -> [Bool]
+orN :: Mpin -> Mpin -> Mpin
 orN a b = fmap (\(a', b') -> or a' b') $ zip a b
 
 -- The previous defined boolean gates don't allow any way to return anything other than a Bool
 -- A separate mechanism was needed, so falling back to Haskell. In chip designs the chip definition
 -- allows the designer mechanisms for defining imperative logic for outs not possible here.
-muxN :: Bool -> [Bool] -> [Bool] -> [Bool]
+muxN :: Bool -> Mpin -> Mpin -> Mpin
 muxN sel a b | sel       = b
              | otherwise = a
 
-orNWay :: [Bool] -> Bool
+orNWay :: Mpin -> Bool
 orNWay input = foldl or False input
+
+-- Again I just don't yet see anyway to just use previously defined functions to achieve this chip.
+mux4WayN :: Mpin -> Mpin -> Mpin -> Mpin -> (Bool, Bool) -> Mpin
+mux4WayN a b c d (sel1, sel2) | and (not sel1) (not sel2) = a -- 00
+                              | and (not sel1)      sel2  = b -- 01
+                              | and      sel1  (not sel2) = c -- 10
+                              | and      sel1       sel2  = d -- 11
+
+mux8WayN :: Mpin -> Mpin -> Mpin -> Mpin -> Mpin -> Mpin -> Mpin -> Mpin -> (Bool, Bool, Bool) -> Mpin
+mux8WayN a b c d e f g h (sel1, sel2, sel3) | and (and (not sel1) (not sel2)) (not sel3) = a -- 000
+                                            | and (and (not sel1) (not sel2))      sel3  = b -- 001
+                                            | and (and (not sel1)      sel2)  (not sel3) = c -- 010
+                                            | and (and (not sel1)      sel2)       sel3  = d -- 011
+                                            | and (and      sel1  (not sel2)) (not sel3) = e -- 100
+                                            | and (and      sel1  (not sel2))      sel3  = f -- 101
+                                            | and (and      sel1       sel2)  (not sel3) = g -- 110
+                                            | and (and      sel1       sel2)       sel3  = h -- 111
