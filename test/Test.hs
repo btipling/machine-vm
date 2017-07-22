@@ -120,6 +120,42 @@ testOrNWay = let
     result = List.find f inputs
     in (HUnit.TestCase $ HUnit.assertEqual ("orNWay should validate") Nothing result)
 
+testMux4WayN = let
+    a         = fmap toEnum [0, 1, 0, 0,    0, 1, 0, 1,    1, 1, 1, 1,    0, 1, 0, 1]
+    b         = fmap toEnum [0, 0, 1, 1,    1, 0, 0, 0,    0, 0, 0, 0,    0, 1, 0, 0]
+    c         = fmap toEnum [0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0]
+    d         = fmap toEnum [1, 1, 1, 1,    1, 1, 1, 1,    1, 1, 1, 1,    1, 1, 1, 1]
+    pins      = [a, b, c, d]
+    inputs    = [(a, b, c, d, (0, 0), a)
+                ,(a, b, c, d, (0, 1), b)
+                ,(a, b, c, d, (1, 0), c)
+                ,(a, b, c, d, (1, 1), d)]
+    f         = \(a, b, c, d, (s1, s2), exp) -> (Chips.mux4WayN a b c d (toEnum s1, toEnum s2)) /= exp
+    result    = List.find f inputs
+    in (HUnit.TestCase $ HUnit.assertEqual ("mux4wayN should validate") Nothing result)
+
+testMux8WayN = let
+    a         = fmap toEnum [0, 1, 0, 0,    0, 1, 0, 1,    1, 1, 1, 1,    0, 1, 0, 1]
+    b         = fmap toEnum [0, 0, 1, 1,    1, 0, 0, 0,    0, 0, 0, 0,    0, 1, 0, 0]
+    c         = fmap toEnum [0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0]
+    d         = fmap toEnum [1, 1, 1, 1,    1, 1, 1, 1,    1, 1, 1, 1,    1, 1, 1, 1]
+    e         = fmap toEnum [1, 1, 0, 0,    0, 0, 1, 1,    1, 1, 0, 0,    1, 1, 0, 0]
+    f         = fmap toEnum [0, 0, 1, 1,    1, 1, 0, 0,    0, 0, 1, 1,    0, 0, 1, 1]
+    g         = fmap toEnum [0, 0, 0, 0,    1, 1, 1, 1,    0, 0, 0, 0,    1, 1, 1, 1]
+    h         = fmap toEnum [1, 1, 1, 1,    0, 0, 0, 0,    1, 1, 1, 1,    0, 0, 0, 0]
+    pins      = [a, b, c, d, e, f, g, h]
+    inputs    = [(a, b, c, d, e, f, g, h, (0, 0, 0), a)
+                ,(a, b, c, d, e, f, g, h, (0, 0, 1), b)
+                ,(a, b, c, d, e, f, g, h, (0, 1, 0), c)
+                ,(a, b, c, d, e, f, g, h, (0, 1, 1), d)
+                ,(a, b, c, d, e, f, g, h, (1, 0, 0), e)
+                ,(a, b, c, d, e, f, g, h, (1, 0, 1), f)
+                ,(a, b, c, d, e, f, g, h, (1, 1, 0), g)
+                ,(a, b, c, d, e, f, g, h, (1, 1, 1), h)]
+    fn        = \(a, b, c, d, e, f, g, h, (s1, s2, s3), exp) -> (Chips.mux8WayN a b c d e f g h (toEnum s1, toEnum s2, toEnum s3)) /= exp
+    result    = List.find fn inputs
+    in (HUnit.TestCase $ HUnit.assertEqual ("mux8wayN should validate") Nothing result)
+
 main :: IO ()
 main = do
     result <- HUnit.runTestTT $ HUnit.TestList [testChipsNand
@@ -134,7 +170,9 @@ main = do
                                                ,testOrN
                                                ,testMuxNa
                                                ,testMuxNb
-                                               ,testOrNWay]
+                                               ,testOrNWay
+                                               ,testMux4WayN
+                                               ,testMux8WayN]
     if (HUnit.failures result) > 0
         then Exit.exitWith $ Exit.ExitFailure 1
         else Exit.exitWith Exit.ExitSuccess
