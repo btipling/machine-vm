@@ -11,7 +11,9 @@ module Machine.Chips (nand
                      ,muxN
                      ,orNWay
                      ,mux4WayN
-                     ,mux8WayN) where
+                     ,mux8WayN
+                     ,dmux4Way
+                     ,dmux8Way) where
 
 import           Prelude hiding (and, not, or)
 
@@ -80,9 +82,29 @@ mux4WayN a b c d (sel1, sel2) | and (not sel1) (not sel2) = a -- 00
 mux8WayN :: Mpin -> Mpin -> Mpin -> Mpin -> Mpin -> Mpin -> Mpin -> Mpin -> (Bool, Bool, Bool) -> Mpin
 mux8WayN a b c d e f g h (sel1, sel2, sel3) | and (and (not sel1) (not sel2)) (not sel3) = a -- 000
                                             | and (and (not sel1) (not sel2))      sel3  = b -- 001
-                                            | and (and (not sel1)      sel2)  (not sel3) = c -- 010
-                                            | and (and (not sel1)      sel2)       sel3  = d -- 011
+                                            | and (and (not sel1)      sel2 ) (not sel3) = c -- 010
+                                            | and (and (not sel1)      sel2 )      sel3  = d -- 011
                                             | and (and      sel1  (not sel2)) (not sel3) = e -- 100
                                             | and (and      sel1  (not sel2))      sel3  = f -- 101
-                                            | and (and      sel1       sel2)  (not sel3) = g -- 110
-                                            | and (and      sel1       sel2)       sel3  = h -- 111
+                                            | and (and      sel1       sel2 ) (not sel3) = g -- 110
+                                            | and (and      sel1       sel2 )      sel3  = h -- 111
+
+dmux4Way :: Bool -> (Bool, Bool) -> (Bool, Bool, Bool, Bool)
+dmux4Way input (sel1, sel2) = let
+    a = and (and (not sel1) (not sel2)) input -- 00
+    b = and (and (not sel1)      sel2)  input -- 01
+    c = and (and      sel1  (not sel2)) input -- 10
+    d = and (and      sel1       sel2)  input -- 11
+    in ((a, b, c, d))
+
+dmux8Way :: Bool -> (Bool, Bool, Bool) -> (Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool)
+dmux8Way input (sel1, sel2, sel3) = let
+    a = and (and (and (not sel1) (not sel2)) (not sel3)) input -- 000
+    b = and (and (and (not sel1) (not sel2))      sel3 ) input -- 001
+    c = and (and (and (not sel1)      sel2 ) (not sel3)) input -- 010
+    d = and (and (and (not sel1)      sel2 )      sel3 ) input -- 011
+    e = and (and (and      sel1  (not sel2)) (not sel3)) input -- 100
+    f = and (and (and      sel1  (not sel2))      sel3 ) input -- 101
+    g = and (and (and      sel1       sel2 ) (not sel3)) input -- 110
+    h = and (and (and      sel1       sel2 )      sel3 ) input -- 111
+    in ((a, b, c, d, e, f, g, h))

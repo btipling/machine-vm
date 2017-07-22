@@ -120,6 +120,7 @@ testOrNWay = let
     result = List.find f inputs
     in (HUnit.TestCase $ HUnit.assertEqual ("orNWay should validate") Nothing result)
 
+testMux4WayN :: HUnit.Test
 testMux4WayN = let
     a         = fmap toEnum [0, 1, 0, 0,    0, 1, 0, 1,    1, 1, 1, 1,    0, 1, 0, 1]
     b         = fmap toEnum [0, 0, 1, 1,    1, 0, 0, 0,    0, 0, 0, 0,    0, 1, 0, 0]
@@ -134,6 +135,7 @@ testMux4WayN = let
     result    = List.find f inputs
     in (HUnit.TestCase $ HUnit.assertEqual ("mux4wayN should validate") Nothing result)
 
+testMux8WayN :: HUnit.Test
 testMux8WayN = let
     a         = fmap toEnum [0, 1, 0, 0,    0, 1, 0, 1,    1, 1, 1, 1,    0, 1, 0, 1]
     b         = fmap toEnum [0, 0, 1, 1,    1, 0, 0, 0,    0, 0, 0, 0,    0, 1, 0, 0]
@@ -156,6 +158,46 @@ testMux8WayN = let
     result    = List.find fn inputs
     in (HUnit.TestCase $ HUnit.assertEqual ("mux8wayN should validate") Nothing result)
 
+testDmux4Way :: HUnit.Test
+testDmux4Way = let
+    values    = [((0, 0), 0, (0, 0, 0, 0))
+                ,((0, 1), 0, (0, 0, 0, 0))
+                ,((1, 0), 0, (0, 0, 0, 0))
+                ,((1, 1), 0, (0, 0, 0, 0))
+                ,((0, 0), 1, (1, 0, 0, 0))
+                ,((0, 1), 1, (0, 1, 0, 0))
+                ,((1, 0), 1, (0, 0, 1, 0))
+                ,((1, 1), 1, (0, 0, 0, 1))]
+    enumify   = \((s1, s2), i, (a, b, c, d)) -> ((toEnum s1, toEnum s2), toEnum i, (toEnum a, toEnum b, toEnum c, toEnum d)) :: ((Bool, Bool), Bool, (Bool, Bool, Bool, Bool))
+    values'   = fmap enumify values
+    f         = \((sel1, sel2), i, expected) -> (Chips.dmux4Way i (sel1, sel2)) /= expected
+    result    = List.find f values'
+    in (HUnit.TestCase $ HUnit.assertEqual ("dmux4Way should validate") Nothing result)
+
+testDmux8Way :: HUnit.Test
+testDmux8Way = let
+    values    = [((0, 0, 0), 0, (0, 0, 0, 0, 0, 0, 0, 0))
+                ,((0, 0, 1), 0, (0, 0, 0, 0, 0, 0, 0, 0))
+                ,((0, 1, 0), 0, (0, 0, 0, 0, 0, 0, 0, 0))
+                ,((0, 1, 1), 0, (0, 0, 0, 0, 0, 0, 0, 0))
+                ,((1, 0, 0), 0, (0, 0, 0, 0, 0, 0, 0, 0))
+                ,((1, 0, 1), 0, (0, 0, 0, 0, 0, 0, 0, 0))
+                ,((1, 1, 0), 0, (0, 0, 0, 0, 0, 0, 0, 0))
+                ,((1, 1, 1), 0, (0, 0, 0, 0, 0, 0, 0, 0))
+                ,((0, 0, 0), 1, (1, 0, 0, 0, 0, 0, 0, 0))
+                ,((0, 0, 1), 1, (0, 1, 0, 0, 0, 0, 0, 0))
+                ,((0, 1, 0), 1, (0, 0, 1, 0, 0, 0, 0, 0))
+                ,((0, 1, 1), 1, (0, 0, 0, 1, 0, 0, 0, 0))
+                ,((1, 0, 0), 1, (0, 0, 0, 0, 1, 0, 0, 0))
+                ,((1, 0, 1), 1, (0, 0, 0, 0, 0, 1, 0, 0))
+                ,((1, 1, 0), 1, (0, 0, 0, 0, 0, 0, 1, 0))
+                ,((1, 1, 1), 1, (0, 0, 0, 0, 0, 0, 0, 1))]
+    enumify   = \((s1, s2, s3), i, (a, b, c, d, e, f, g, h)) -> ((toEnum s1, toEnum s2, toEnum s3), toEnum i, (toEnum a, toEnum b, toEnum c, toEnum d, toEnum e, toEnum f, toEnum g, toEnum h)) :: ((Bool, Bool, Bool), Bool, (Bool, Bool, Bool, Bool, Bool, Bool, Bool, Bool))
+    values'   = fmap enumify values
+    f         = \((sel1, sel2, sel3), i, expected) -> (Chips.dmux8Way i (sel1, sel2, sel3)) /= expected
+    result    = List.find f values'
+    in (HUnit.TestCase $ HUnit.assertEqual ("dmux8Way should validate") Nothing result)
+
 main :: IO ()
 main = do
     result <- HUnit.runTestTT $ HUnit.TestList [testChipsNand
@@ -172,7 +214,9 @@ main = do
                                                ,testMuxNb
                                                ,testOrNWay
                                                ,testMux4WayN
-                                               ,testMux8WayN]
+                                               ,testMux8WayN
+                                               ,testDmux4Way
+                                               ,testDmux8Way]
     if (HUnit.failures result) > 0
         then Exit.exitWith $ Exit.ExitFailure 1
         else Exit.exitWith Exit.ExitSuccess
