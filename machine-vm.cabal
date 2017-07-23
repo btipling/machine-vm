@@ -20,6 +20,7 @@ executable machine-vm
   build-depends:       base >= 4.7 && < 5,
                        containers >= 0.5.10 && < 0.6
   other-modules:       Machine.Chips
+                      ,Machine.ALU
 
 Test-Suite test-machine-vm
   type:                exitcode-stdio-1.0
@@ -30,5 +31,6 @@ Test-Suite test-machine-vm
   build-depends:       base >=4.7 && < 5,
                        HUnit
   other-modules:       Machine.Chips
+                      ,Machine.ALU
                       ,VMTest.Machine.Chips
                       ,VMTest.Machine.ALU

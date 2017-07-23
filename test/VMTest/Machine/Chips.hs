@@ -64,7 +64,7 @@ testChipsDMux = let
                 ,(1, 1, (0, 1))]
     f         = \(sel, i, (a, b)) -> (Chips.dmux (toEnum sel) (toEnum i)) /= ((toEnum a), (toEnum b))
     result    = List.find f values
-    in (HUnit.TestCase $ HUnit.assertEqual ("dmux should validate") Nothing result)
+    in (HUnit.TestCase $ HUnit.assertEqual "dmux should validate" Nothing result)
 
 testNInputGate :: String -> [Bool] -> [Bool] -> HUnit.Test
 testNInputGate name output expected = let
@@ -100,7 +100,7 @@ testMuxNa = let
     a        = fmap toEnum [  0, 1, 0, 0,    0, 1, 0, 1,    1, 1, 1, 1,    0, 1, 0, 1  ]
     b        = fmap toEnum [  1, 1, 0, 1,    0, 0, 0, 1,    1, 0, 1, 0,    1, 1, 1, 1  ]
     result   = Chips.muxN sel a b
-    in (HUnit.TestCase $ HUnit.assertEqual ("muxN should validate for a sel") a result)
+    in (HUnit.TestCase $ HUnit.assertEqual "muxN should validate for a sel" a result)
 
 testMuxNb :: HUnit.Test
 testMuxNb = let
@@ -108,7 +108,7 @@ testMuxNb = let
     a        = fmap toEnum [  0, 1, 0, 0,    0, 1, 0, 1,    1, 1, 1, 1,    0, 1, 0, 1  ]
     b        = fmap toEnum [  1, 1, 0, 1,    0, 0, 0, 1,    1, 0, 1, 0,    1, 1, 1, 1  ]
     result   = Chips.muxN sel a b
-    in (HUnit.TestCase $ HUnit.assertEqual ("muxN should validate for a sel") b result)
+    in (HUnit.TestCase $ HUnit.assertEqual "muxN should validate for a sel" b result)
 
 testOrNWay :: HUnit.Test
 testOrNWay = let
@@ -117,7 +117,7 @@ testOrNWay = let
              ,([0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0,    0, 0, 0, 0], 0)]
     f      = \(input, expected) -> (Chips.orNWay (fmap toEnum input)) /= toEnum expected
     result = List.find f inputs
-    in (HUnit.TestCase $ HUnit.assertEqual ("orNWay should validate") Nothing result)
+    in (HUnit.TestCase $ HUnit.assertEqual "orNWay should validate" Nothing result)
 
 testMux4WayN :: HUnit.Test
 testMux4WayN = let
@@ -132,7 +132,7 @@ testMux4WayN = let
                 ,(a, b, c, d, (1, 1), d)]
     f         = \(a, b, c, d, (s1, s2), exp) -> (Chips.mux4WayN a b c d (toEnum s1, toEnum s2)) /= exp
     result    = List.find f inputs
-    in (HUnit.TestCase $ HUnit.assertEqual ("mux4wayN should validate") Nothing result)
+    in (HUnit.TestCase $ HUnit.assertEqual "mux4wayN should validate" Nothing result)
 
 testMux8WayN :: HUnit.Test
 testMux8WayN = let
@@ -155,7 +155,7 @@ testMux8WayN = let
                 ,(a, b, c, d, e, f, g, h, (1, 1, 1), h)]
     fn        = \(a, b, c, d, e, f, g, h, (s1, s2, s3), exp) -> (Chips.mux8WayN a b c d e f g h (toEnum s1, toEnum s2, toEnum s3)) /= exp
     result    = List.find fn inputs
-    in (HUnit.TestCase $ HUnit.assertEqual ("mux8wayN should validate") Nothing result)
+    in (HUnit.TestCase $ HUnit.assertEqual "mux8wayN should validate" Nothing result)
 
 testDmux4Way :: HUnit.Test
 testDmux4Way = let
@@ -171,7 +171,7 @@ testDmux4Way = let
     values'   = fmap enumify values
     f         = \((sel1, sel2), i, expected) -> (Chips.dmux4Way i (sel1, sel2)) /= expected
     result    = List.find f values'
-    in (HUnit.TestCase $ HUnit.assertEqual ("dmux4Way should validate") Nothing result)
+    in (HUnit.TestCase $ HUnit.assertEqual "dmux4Way should validate" Nothing result)
 
 testDmux8Way :: HUnit.Test
 testDmux8Way = let
@@ -195,7 +195,7 @@ testDmux8Way = let
     values'   = fmap enumify values
     f         = \((sel1, sel2, sel3), i, expected) -> (Chips.dmux8Way i (sel1, sel2, sel3)) /= expected
     result    = List.find f values'
-    in (HUnit.TestCase $ HUnit.assertEqual ("dmux8Way should validate") Nothing result)
+    in (HUnit.TestCase $ HUnit.assertEqual "dmux8Way should validate" Nothing result)
 
 chipTests :: [HUnit.Test]
 chipTests = [testChipsNand
