@@ -13,7 +13,8 @@ module Machine.Chips (nand
                      ,mux4WayN
                      ,mux8WayN
                      ,dmux4Way
-                     ,dmux8Way) where
+                     ,dmux8Way
+                     ,Mpin) where
 
 import           Prelude hiding (and, not, or)
 
