@@ -30,3 +30,5 @@ Test-Suite test-machine-vm
   build-depends:       base >=4.7 && < 5,
                        HUnit
   other-modules:       Machine.Chips
+                      ,VMTest.Machine.Chips
+                      ,VMTest.Machine.ALU
