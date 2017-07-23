@@ -25,7 +25,7 @@ addN a b = let
     ab    = zip a b
     f     = Tuple.uncurry halfAdder
     pairs = fmap f ab
-    sums  = fmap (\(curry, sum) -> sum) pairs
+    sums  = fmap (\(carry, sum) -> sum) pairs
     in (sums)
 
 incN :: Chips.Mpin -> Chips.Mpin
