@@ -1,7 +1,7 @@
 module Main where
 
-import qualified Machine.Chips as Chips
+import qualified Machine.Gates as Gates
 
 main :: IO ()
 main = do
-  putStrLn $ "nand: " ++ (show $ Chips.nand (toEnum 0) (toEnum 1))
+  putStrLn $ "nand: " ++ (show $ Gates.nand (toEnum 0) (toEnum 1))

@@ -1,4 +1,4 @@
-module Machine.Chips (nand
+module Machine.Gates (nand
                      ,not
                      ,and
                      ,or
