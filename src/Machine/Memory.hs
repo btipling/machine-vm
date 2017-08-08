@@ -9,7 +9,7 @@ import qualified Machine.Gates       as Gates
 dff :: Bool -> State.State Bool Bool
 dff n = State.state (\s -> (s, n))
 
--- a bit register uses the dff to either store a new value or store previos value
+-- a bit register uses the dff to either store a new value or store previous value
 -- it always outputs what what stored in it previously
 -- if load out = input (t - 1) else if not load out = out (t - 1)
 bitRegister :: Bool -> Bool -> State.State Bool Bool
