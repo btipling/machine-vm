@@ -38,6 +38,7 @@ or a b = nand (not a) (not b)
 xor :: Bool -> Bool -> Bool
 xor a b = nand (nand a (nand a b)) (nand b (nand a b))
 
+-- if sel is False a is output, else b is output
 mux :: Bool -> Bool -> Bool -> Bool
 mux a b sel = or (and (not sel) a) (and sel b)
 
