@@ -1,6 +1,7 @@
 module VMTest.Machine.Memory (memoryTests) where
 
 import qualified Control.Monad.State as State
+import qualified Data.List           as List
 import qualified Machine.Memory      as Memory
 import qualified Test.HUnit          as HUnit
 
@@ -40,8 +41,27 @@ dffZeroOutZeroInTest = let
     out      = State.runState (runDff dffIn) dffStart
     in (HUnit.TestCase $ HUnit.assertEqual "dff 0 0 should validate" expected out)
 
+runBitRegister :: Bool -> Bool -> State.State Bool Bool
+runBitRegister input load = do
+    Memory.bitRegister input load
+
+testbitRegister :: HUnit.Test
+testbitRegister = let
+    inputs = [(1, 1, 1, (toEnum 1, toEnum 1))
+             ,(1, 0, 1, (toEnum 1, toEnum 1))
+             ,(1, 1, 0, (toEnum 0, toEnum 1))  -- when load is 1 input is is stored and the previous state is the output
+             ,(1, 0, 0, (toEnum 0, toEnum 0))  -- when load is 0 input is ignored and output is stored, output is the previous state
+             ,(0, 0, 0, (toEnum 0, toEnum 0))
+             ,(0, 1, 0, (toEnum 0, toEnum 0))
+             ,(0, 0, 1, (toEnum 1, toEnum 1))  -- when load is 0 out is 1 and stored is 1 as we're storing what we had previously
+             ,(0, 1, 1, (toEnum 1, toEnum 0))] -- when load is 1 out is 1 and stored is 0 as we're storing the new input
+    fn     = \(input, load, stateStart, expected) -> (State.runState (runBitRegister (toEnum input) (toEnum load)) (toEnum stateStart)) /= expected
+    result = List.find fn inputs
+    in (HUnit.TestCase $ HUnit.assertEqual "gitRegister should validate" Nothing result)
+
 memoryTests :: [HUnit.Test]
 memoryTests = [dffZeroOutOneInTest
               ,dffOneOutOneInTest
               ,dffOneOutZeroInTest
-              ,dffZeroOutZeroInTest]
+              ,dffZeroOutZeroInTest
+              ,testbitRegister]
