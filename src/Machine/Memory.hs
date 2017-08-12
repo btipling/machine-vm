@@ -24,8 +24,8 @@ bit input load = do
 register :: [Bool] -> Bool -> State.State [Bool] [Bool]
 register inputs load = do
     currentState <- State.get
-    let runBit = \input -> bit input load
-    let f      = \(input, s) -> State.runState (runBit input) s
-    let result = unzip $ fmap f $ zip inputs currentState
+    let runBit   = \input -> bit input load
+    let f        = \(input, s) -> State.runState (runBit input) s
+    let result   = unzip $ fmap f $ zip inputs currentState
     let stateify = \(inputs, newState) -> \s -> (inputs, newState)
     State.state (stateify result)
