@@ -57,11 +57,36 @@ testBit = let
              ,(0, 1, 1, (toEnum 1, toEnum 0))] -- when load is 1 out is 1 and stored is 0 as we're storing the new input
     fn     = \(input, load, stateStart, expected) -> (State.runState (runBit (toEnum input) (toEnum load)) (toEnum stateStart)) /= expected
     result = List.find fn inputs
-    in (HUnit.TestCase $ HUnit.assertEqual "gitRegister should validate" Nothing result)
+    in (HUnit.TestCase $ HUnit.assertEqual "bit should validate" Nothing result)
+
+runRegister :: [Bool] -> Bool -> State.State [Bool] [Bool]
+runRegister inputs load = do
+    Memory.register inputs load
+
+i2b :: [Int] -> [Bool]
+i2b ints = fmap toEnum ints
+
+-- the following checks are pretty much the same as above for testBit but for lists
+testRegister :: HUnit.Test
+testRegister = let
+    inputs = [((i2b [1, 1, 1, 1, 1, 1, 1, 1]), toEnum 1, (i2b [1, 1, 1, 1, 1, 1, 1, 1]), ((i2b [1, 1, 1, 1, 1, 1, 1, 1]), (i2b [1, 1, 1, 1, 1, 1, 1, 1])))
+             ,((i2b [1, 1, 1, 1, 1, 1, 1, 1]), toEnum 0, (i2b [1, 1, 1, 1, 1, 1, 1, 1]), ((i2b [1, 1, 1, 1, 1, 1, 1, 1]), (i2b [1, 1, 1, 1, 1, 1, 1, 1])))
+             ,((i2b [1, 1, 1, 1, 1, 1, 1, 1]), toEnum 1, (i2b [0, 0, 0, 0, 0, 0, 0, 0]), ((i2b [0, 0, 0, 0, 0, 0, 0, 0]), (i2b [1, 1, 1, 1, 1, 1, 1, 1])))
+             ,((i2b [1, 1, 1, 1, 1, 1, 1, 1]), toEnum 0, (i2b [0, 0, 0, 0, 0, 0, 0, 0]), ((i2b [0, 0, 0, 0, 0, 0, 0, 0]), (i2b [0, 0, 0, 0, 0, 0, 0, 0])))
+             ,((i2b [0, 0, 0, 0, 0, 0, 0, 0]), toEnum 0, (i2b [0, 0, 0, 0, 0, 0, 0, 0]), ((i2b [0, 0, 0, 0, 0, 0, 0, 0]), (i2b [0, 0, 0, 0, 0, 0, 0, 0])))
+             ,((i2b [0, 0, 0, 0, 0, 0, 0, 0]), toEnum 1, (i2b [0, 0, 0, 0, 0, 0, 0, 0]), ((i2b [0, 0, 0, 0, 0, 0, 0, 0]), (i2b [0, 0, 0, 0, 0, 0, 0, 0])))
+             ,((i2b [0, 0, 0, 0, 0, 0, 0, 0]), toEnum 0, (i2b [1, 1, 1, 1, 1, 1, 1, 1]), ((i2b [1, 1, 1, 1, 1, 1, 1, 1]), (i2b [1, 1, 1, 1, 1, 1, 1, 1])))
+             ,((i2b [0, 0, 0, 0, 0, 0, 0, 0]), toEnum 1, (i2b [1, 1, 1, 1, 1, 1, 1, 1]), ((i2b [1, 1, 1, 1, 1, 1, 1, 1]), (i2b [0, 0, 0, 0, 0, 0, 0, 0])))
+             ,((i2b [0, 0, 0, 0, 1, 1, 1, 1]), toEnum 0, (i2b [1, 1, 1, 1, 0, 0, 0, 0]), ((i2b [1, 1, 1, 1, 0, 0, 0, 0]), (i2b [1, 1, 1, 1, 0, 0, 0, 0])))
+             ,((i2b [0, 0, 0, 0, 1, 1, 1, 1]), toEnum 1, (i2b [1, 1, 1, 1, 0, 0, 0, 0]), ((i2b [1, 1, 1, 1, 0, 0, 0, 0]), (i2b [0, 0, 0, 0, 1, 1, 1, 1])))]
+    fn     = \(inputs, load, stateStart, expected) -> (State.runState (runRegister inputs load) stateStart) /= expected
+    result = List.find fn inputs
+    in (HUnit.TestCase $ HUnit.assertEqual "register should validate" Nothing result)
 
 memoryTests :: [HUnit.Test]
 memoryTests = [dffZeroOutOneInTest
               ,dffOneOutOneInTest
               ,dffOneOutZeroInTest
               ,dffZeroOutZeroInTest
-              ,testBit]
+              ,testBit
+              ,testRegister]

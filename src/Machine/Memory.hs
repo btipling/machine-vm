@@ -1,5 +1,6 @@
 module Machine.Memory (dff
-                      ,bit) where
+                      ,bit
+                      ,register) where
 
 import qualified Control.Monad.State as State
 import qualified Machine.Gates       as Gates
@@ -18,4 +19,13 @@ bit input load = do
     currentState <- State.get
     dff $ Gates.mux currentState input load
 
-
+-- a register is basically a bit that takes arrays of bits and stores arrays of bits
+-- instead of just single bits
+register :: [Bool] -> Bool -> State.State [Bool] [Bool]
+register inputs load = do
+    currentState <- State.get
+    let runBit   = \input -> bit input load
+    let f        = \(input, s) -> State.runState (runBit input) s
+    let result   = unzip $ fmap f $ zip inputs currentState
+    let stateify = \(inputs, newState) -> \s -> (inputs, newState)
+    State.state (stateify result)
