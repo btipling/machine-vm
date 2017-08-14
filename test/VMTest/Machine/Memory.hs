@@ -83,10 +83,91 @@ testRegister = let
     result = List.find fn inputs
     in (HUnit.TestCase $ HUnit.assertEqual "register should validate" Nothing result)
 
+runRam8 :: [Bool] -> Bool -> (Bool, Bool, Bool) -> State.State Memory.RAM8 [Bool]
+runRam8 inputs load address = do
+    Memory.ram8 inputs load address
+
+-- Memory is just too verbose to test with multivalue int arrays. Needs separate test cases for some
+-- different inputs, but not comprehensive.
+ram8A = i2b [0, 0, 0]
+ram8B = i2b [0, 0, 1]
+ram8C = i2b [0, 1, 0]
+ram8D = i2b [0, 1, 1]
+ram8E = i2b [1, 0, 0]
+ram8F = i2b [1, 0, 1]
+ram8G = i2b [1, 1, 0]
+ram8H = i2b [1, 1, 1]
+
+testRam8ALoad :: HUnit.Test
+testRam8ALoad = let
+    inputs       = i2b [1, 1, 1]
+    currentState = (ram8A, ram8B, ram8C, ram8D, ram8E, ram8F, ram8G, ram8H)
+    expected     = (ram8A, (inputs, ram8B, ram8C, ram8D, ram8E, ram8F, ram8G, ram8H))
+    load         = True
+    address      = (False, False, False)
+    result       = State.runState (runRam8 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram8 should validate for a load" expected result)
+
+testRam8AKeep :: HUnit.Test
+testRam8AKeep = let
+    inputs       = i2b [1, 1, 1]
+    currentState = (ram8A, ram8B, ram8C, ram8D, ram8E, ram8F, ram8G, ram8H)
+    expected     = (ram8A, (ram8A, ram8B, ram8C, ram8D, ram8E, ram8F, ram8G, ram8H))
+    load         = False
+    address      = (False, False, False)
+    result       = State.runState (runRam8 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram8 should validate for a keep" expected result)
+
+testRam8DLoad :: HUnit.Test
+testRam8DLoad = let
+    inputs       = i2b [0, 0, 0]
+    currentState = (ram8A, ram8B, ram8C, ram8D, ram8E, ram8F, ram8G, ram8H)
+    expected     = (ram8D, (ram8A, ram8B, ram8C, inputs, ram8E, ram8F, ram8G, ram8H))
+    load         = True
+    address      = (False, True, True)
+    result       = State.runState (runRam8 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram8 should validate for d load" expected result)
+
+testRam8DKeep :: HUnit.Test
+testRam8DKeep = let
+    inputs       = i2b [0, 0, 0]
+    currentState = (ram8A, ram8B, ram8C, ram8D, ram8E, ram8F, ram8G, ram8H)
+    expected     = (ram8D, (ram8A, ram8B, ram8C, ram8D, ram8E, ram8F, ram8G, ram8H))
+    load         = False
+    address      = (False, True, True)
+    result       = State.runState (runRam8 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram8 should validate for d keep" expected result)
+
+testRam8HLoad :: HUnit.Test
+testRam8HLoad = let
+    inputs       = i2b [0, 1, 0]
+    currentState = (ram8A, ram8B, ram8C, ram8D, ram8E, ram8F, ram8G, ram8H)
+    expected     = (ram8H, (ram8A, ram8B, ram8C, ram8D, ram8E, ram8F, ram8G, inputs))
+    load         = True
+    address      = (True, True, True)
+    result       = State.runState (runRam8 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram8 should validate for h load" expected result)
+
+testRam8HKeep :: HUnit.Test
+testRam8HKeep = let
+    inputs       = i2b [0, 1, 0]
+    currentState = (ram8A, ram8B, ram8C, ram8D, ram8E, ram8F, ram8G, ram8H)
+    expected     = (ram8H, (ram8A, ram8B, ram8C, ram8D, ram8E, ram8F, ram8G, ram8H))
+    load         = False
+    address      = (True, True, True)
+    result       = State.runState (runRam8 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram8 should validate for h keep" expected result)
+
 memoryTests :: [HUnit.Test]
 memoryTests = [dffZeroOutOneInTest
               ,dffOneOutOneInTest
               ,dffOneOutZeroInTest
               ,dffZeroOutZeroInTest
               ,testBit
-              ,testRegister]
+              ,testRegister
+              ,testRam8ALoad
+              ,testRam8AKeep
+              ,testRam8DLoad
+              ,testRam8DKeep
+              ,testRam8HLoad
+              ,testRam8HKeep]
