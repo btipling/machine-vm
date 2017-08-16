@@ -32,9 +32,39 @@ register inputs load = do
     State.state (\_ -> result)
 
 type RAM8 = ([Bool], [Bool], [Bool], [Bool], [Bool], [Bool], [Bool], [Bool])
+type Addr8 = (Bool, Bool, Bool)
 
 runRegister :: [Bool] -> Bool -> State.State [Bool] [Bool]
 runRegister = \input load -> register input load
+
+-- This takes 8 arguments (either, [Bool], RAM8, RAM64, etc) and an (output, state) object
+-- as well as an 8 bit address. The dmux result tuple of 8 bools and returns a new state.
+-- The 8 tuple of bools informs which of the 8 states to change
+stateFromAddress a b c d e f g h (o, s) address = let
+    r = Gates.dmux8Way True address
+    n = case r of (True, False, False, False, False, False, False, False) -> (o, (s, b, c, d, e, f, g, h))
+                  (False, True, False, False, False, False, False, False) -> (o, (a, s, c, d, e, f, g, h))
+                  (False, False, True, False, False, False, False, False) -> (o, (a, b, s, d, e, f, g, h))
+                  (False, False, False, True, False, False, False, False) -> (o, (a, b, c, s, e, f, g, h))
+                  (False, False, False, False, True, False, False, False) -> (o, (a, b, c, d, s, f, g, h))
+                  (False, False, False, False, False, True, False, False) -> (o, (a, b, c, d, e, s, g, h))
+                  (False, False, False, False, False, False, True, False) -> (o, (a, b, c, d, e, f, s, h))
+                  (False, False, False, False, False, False, False, True) -> (o, (a, b, c, d, e, f, g, s))
+    in (n)
+
+-- This function demultiplexes an 8 bit (three tuple bool) address to figure out
+-- which state to run a function on
+functionFromAddress a b c d e f g h fn address = let
+    r = Gates.dmux8Way True address
+    result = case r of (True, False, False, False, False, False, False, False) -> fn a
+                       (False, True, False, False, False, False, False, False) -> fn b
+                       (False, False, True, False, False, False, False, False) -> fn c
+                       (False, False, False, True, False, False, False, False) -> fn d
+                       (False, False, False, False, True, False, False, False) -> fn e
+                       (False, False, False, False, False, True, False, False) -> fn f
+                       (False, False, False, False, False, False, True, False) -> fn g
+                       (False, False, False, False, False, False, False, True) -> fn h
+    in (result)
 
 -- This function gets 8 arrays of bools and determines based on the address
 -- on which to run the load on.
@@ -45,18 +75,26 @@ runRegister = \input load -> register input load
 -- supplied to `n`, the new state, and the resulting function ignores the previous
 -- state in the state monad. It can do that because we already accounted for that
 -- state with the `<- State.get call.
-ram8 :: [Bool] -> Bool -> (Bool, Bool, Bool) -> State.State RAM8 [Bool]
+ram8 :: [Bool] -> Bool -> Addr8 -> State.State RAM8 [Bool]
 ram8 input load address = do
     (a, b, c, d, e, f, g, h) <- State.get
     let currentState = Gates.mux8WayN a b c d e f g h address
-    let (o, s)       = State.runState (runRegister input load) currentState
-    let r            = Gates.dmux8Way True address
-    let n = case r of (True, False, False, False, False, False, False, False) -> (o, (s, b, c, d, e, f, g, h))
-                      (False, True, False, False, False, False, False, False) -> (o, (a, s, c, d, e, f, g, h))
-                      (False, False, True, False, False, False, False, False) -> (o, (a, b, s, d, e, f, g, h))
-                      (False, False, False, True, False, False, False, False) -> (o, (a, b, c, s, e, f, g, h))
-                      (False, False, False, False, True, False, False, False) -> (o, (a, b, c, d, s, f, g, h))
-                      (False, False, False, False, False, True, False, False) -> (o, (a, b, c, d, e, s, g, h))
-                      (False, False, False, False, False, False, True, False) -> (o, (a, b, c, d, e, f, s, h))
-                      (False, False, False, False, False, False, False, True) -> (o, (a, b, c, d, e, f, g, s))
+    let stateOutput  = State.runState (runRegister input load) currentState
+    let n            = stateFromAddress a b c d e f g h stateOutput address
+    State.state (\_ -> n)
+
+type RAM64 = (RAM8, RAM8, RAM8, RAM8, RAM8, RAM8, RAM8, RAM8)
+
+runRam8 :: [Bool] -> Bool -> Addr8 -> State.State RAM8 [Bool]
+runRam8 = \input load addr -> ram8 input load addr
+
+-- ram64 takes a bit array and a load and two 8 bit addresses and runs it
+-- on a state of RAM64 (an 8 tuple of RAM8s).
+ram64 :: [Bool] -> Bool -> (Addr8, Addr8) -> State.State RAM64 [Bool]
+ram64 input load (addr64, addr8) = do
+    (a, b, c, d, e, f, g, h) <- State.get
+    let dmuxResult = Gates.dmux8Way True addr64
+    let fn = State.runState (runRam8 input load addr8)
+    let stateOutput = functionFromAddress a b c d e f g h fn addr64
+    let n = stateFromAddress a b c d e f g h stateOutput addr64
     State.state (\_ -> n)
