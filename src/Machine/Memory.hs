@@ -2,7 +2,10 @@ module Machine.Memory (dff
                       ,bit
                       ,register
                       ,RAM8
-                      ,ram8) where
+                      ,ram8
+                      ,RAM64
+                      ,ram64
+                      ,Addr8) where
 
 import qualified Control.Monad.State as State
 import qualified Machine.Gates       as Gates

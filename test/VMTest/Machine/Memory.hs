@@ -3,6 +3,7 @@ module VMTest.Machine.Memory (memoryTests) where
 import qualified Control.Monad.State as State
 import qualified Data.List           as List
 import qualified Machine.Memory      as Memory
+import qualified System.Random       as Random
 import qualified Test.HUnit          as HUnit
 
 runDff :: Bool -> State.State Bool Bool
@@ -83,7 +84,7 @@ testRegister = let
     result = List.find fn inputs
     in (HUnit.TestCase $ HUnit.assertEqual "register should validate" Nothing result)
 
-runRam8 :: [Bool] -> Bool -> (Bool, Bool, Bool) -> State.State Memory.RAM8 [Bool]
+runRam8 :: [Bool] -> Bool -> Memory.Addr8 -> State.State Memory.RAM8 [Bool]
 runRam8 inputs load address = do
     Memory.ram8 inputs load address
 
@@ -158,6 +159,105 @@ testRam8HKeep = let
     result       = State.runState (runRam8 inputs load address) currentState
     in (HUnit.TestCase $ HUnit.assertEqual "ram8 should validate for h keep" expected result)
 
+genRandomBit :: Random.StdGen -> (Bool, Random.StdGen)
+genRandomBit g = let
+    (randomInt, nextG) = Random.random g :: (Int, Random.StdGen)
+    v                  = randomInt `mod` 2 == 0
+    in ((v, nextG))
+
+genRandom8 :: Random.StdGen -> (Random.StdGen -> (a, Random.StdGen)) -> ([a], Random.StdGen)
+genRandom8 g f = let
+    fn        = \_ (xs, curG) -> let (x, nextG) = (f curG) in ((x:xs), nextG)
+    in (foldr fn ([], g) (take 8 (repeat ([], g))))
+
+genRandom8Tuple :: Random.StdGen -> (Random.StdGen -> (a, Random.StdGen)) -> ((a, a, a, a, a, a, a, a), Random.StdGen)
+genRandom8Tuple g f = let
+    (l, nextG) = genRandom8 g f
+    in ((l !! 0, l !! 1, l !! 0, l !! 0, l !! 0, l !! 0, l !! 0, l !! 0), nextG)
+
+genRandomBitArray :: Random.StdGen -> ([Bool], Random.StdGen)
+genRandomBitArray g = genRandom8 g genRandomBit
+
+genRandomRam8 :: Random.StdGen -> (Memory.RAM8, Random.StdGen)
+genRandomRam8 g = genRandom8Tuple g genRandomBitArray
+
+genRandomRam64 :: Random.StdGen -> (Memory.RAM64, Random.StdGen)
+genRandomRam64 g = genRandom8Tuple g genRandomRam8
+
+
+runRam64 :: [Bool] -> Bool -> (Memory.Addr8, Memory.Addr8) -> State.State Memory.RAM64 [Bool]
+runRam64 inputs load address = do
+    Memory.ram64 inputs load address
+
+testRam64AALoad :: HUnit.Test
+testRam64AALoad = let
+    gen                                              = Random.mkStdGen 1
+    (inputs, nextG)                                  = genRandomBitArray gen
+    (currentState, _)                                = genRandomRam64 nextG
+    (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = currentState
+    (a, b, c, d, e, f, g, h)                         = ramA
+    newRamA                                          = (inputs, b, c, d, e, f, g, h)
+    expected                                         = (a, (newRamA, ramB, ramC, ramD, ramE, ramF, ramG, ramH))
+    load                                             = True
+    address                                          = ((False, False, False), (False, False, False))
+    result                                           = State.runState (runRam64 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram64 should validate for aa load" expected result)
+
+
+testRam64AAKeep :: HUnit.Test
+testRam64AAKeep = let
+    gen                                              = Random.mkStdGen 1
+    (inputs, nextG)                                  = genRandomBitArray gen
+    (currentState, _)                                = genRandomRam64 nextG
+    (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = currentState
+    (a, b, c, d, e, f, g, h)                         = ramA
+    expected                                         = (a, (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH))
+    load                                             = False
+    address                                          = ((False, False, False), (False, False, False))
+    result                                           = State.runState (runRam64 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram64 should validate for aa keep" expected result)
+
+testRam64DBLoad :: HUnit.Test
+testRam64DBLoad = let
+    gen                                              = Random.mkStdGen 1
+    (inputs, nextG)                                  = genRandomBitArray gen
+    (currentState, _)                                = genRandomRam64 nextG
+    (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = currentState
+    (a, b, c, d, e, f, g, h)                         = ramD
+    newRamD                                          = (a, inputs, c, d, e, f, g, h)
+    expected                                         = (b, (ramA, ramB, ramC, newRamD, ramE, ramF, ramG, ramH))
+    load                                             = True
+    address                                          = ((False, True, True), (False, False, True))
+    result                                           = State.runState (runRam64 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram64 should validate for db load" expected result)
+
+testRam64HELoad :: HUnit.Test
+testRam64HELoad = let
+    gen                                              = Random.mkStdGen 1
+    (inputs, nextG)                                  = genRandomBitArray gen
+    (currentState, _)                                = genRandomRam64 nextG
+    (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = currentState
+    (a, b, c, d, e, f, g, h)                         = ramH
+    newRamH                                          = (a, b, c, d, inputs, f, g, h)
+    expected                                         = (e, (ramA, ramB, ramC, ramD, ramE, ramF, ramG, newRamH))
+    load                                             = True
+    address                                          = ((True, True, True), (True, False, False))
+    result                                           = State.runState (runRam64 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram64 should validate for he load" expected result)
+
+testRam64HEKeep :: HUnit.Test
+testRam64HEKeep = let
+    gen                                              = Random.mkStdGen 1
+    (inputs, nextG)                                  = genRandomBitArray gen
+    (currentState, _)                                = genRandomRam64 nextG
+    (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = currentState
+    (a, b, c, d, e, f, g, h)                         = ramA
+    expected                                         = (e, (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH))
+    load                                             = False
+    address                                          = ((True, True, True), (True, False, False))
+    result                                           = State.runState (runRam64 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram64 should validate for he keep" expected result)
+
 memoryTests :: [HUnit.Test]
 memoryTests = [dffZeroOutOneInTest
               ,dffOneOutOneInTest
@@ -170,4 +270,9 @@ memoryTests = [dffZeroOutOneInTest
               ,testRam8DLoad
               ,testRam8DKeep
               ,testRam8HLoad
-              ,testRam8HKeep]
+              ,testRam8HKeep
+              ,testRam64AALoad
+              ,testRam64AAKeep
+              ,testRam64DBLoad
+              ,testRam64HELoad
+              ,testRam64HEKeep]
