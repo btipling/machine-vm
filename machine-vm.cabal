@@ -32,6 +32,7 @@ Test-Suite test-machine-vm
                        src
   build-depends:       base >=4.7 && < 5
                       ,mtl >= 2.2 && < 3
+                      ,random >= 1.1 && < 2
                       ,HUnit
   other-modules:       Machine.Gates
                       ,Machine.ALU
