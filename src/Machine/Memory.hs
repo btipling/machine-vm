@@ -41,8 +41,8 @@ runRegister :: [Bool] -> Bool -> State.State [Bool] [Bool]
 runRegister = \input load -> register input load
 
 -- This takes 8 arguments (either, [Bool], RAM8, RAM64, etc) and an (output, state) object
--- as well as an 8 bit address. The dmux result tuple of 8 bools and returns a new state.
--- The 8 tuple of bools informs which of the 8 states to change
+-- as well as an 8 bit address. The dmux result is a tuple of 8 bools and is used to return a new state.
+-- The 8 tuple of bools informs which of the 8 states to change.
 stateFromAddress a b c d e f g h (o, s) address = let
     r = Gates.dmux8Way True address
     n = case r of (True, False, False, False, False, False, False, False) -> (o, (s, b, c, d, e, f, g, h))
