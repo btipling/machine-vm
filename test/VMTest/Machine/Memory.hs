@@ -180,12 +180,12 @@ genRandom4 g f = genRandomN 4 g f
 genRandom4Tuple :: Random.StdGen -> (Random.StdGen -> (a, Random.StdGen)) -> ((a, a, a, a), Random.StdGen)
 genRandom4Tuple g f = let
     (l, nextG) = genRandom4 g f
-    in ((l !! 0, l !! 1, l !! 0, l !! 0), nextG)
+    in ((l !! 0, l !! 1, l !! 2, l !! 3), nextG)
 
 genRandom8Tuple :: Random.StdGen -> (Random.StdGen -> (a, Random.StdGen)) -> ((a, a, a, a, a, a, a, a), Random.StdGen)
 genRandom8Tuple g f = let
     (l, nextG) = genRandom8 g f
-    in ((l !! 0, l !! 1, l !! 0, l !! 0, l !! 0, l !! 0, l !! 0, l !! 0), nextG)
+    in ((l !! 0, l !! 1, l !! 2, l !! 3, l !! 4, l !! 5, l !! 6, l !! 7), nextG)
 
 genRandomBitArray :: Random.StdGen -> ([Bool], Random.StdGen)
 genRandomBitArray g = genRandom8 g genRandomBit
@@ -222,7 +222,6 @@ testRam64AALoad = let
     address                                          = ((False, False, False), (False, False, False))
     result                                           = State.runState (runRam64 inputs load address) currentState
     in (HUnit.TestCase $ HUnit.assertEqual "ram64 should validate for aa load" expected result)
-
 
 testRam64AAKeep :: HUnit.Test
 testRam64AAKeep = let
@@ -271,12 +270,90 @@ testRam64HEKeep = let
     (inputs, nextG)                                  = genRandomBitArray gen
     (currentState, _)                                = genRandomRam64 nextG
     (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = currentState
-    (a, b, c, d, e, f, g, h)                         = ramA
+    (a, b, c, d, e, f, g, h)                         = ramH
     expected                                         = (e, (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH))
     load                                             = False
     address                                          = ((True, True, True), (True, False, False))
     result                                           = State.runState (runRam64 inputs load address) currentState
     in (HUnit.TestCase $ HUnit.assertEqual "ram64 should validate for he keep" expected result)
+
+runRam512 :: [Bool] -> Bool -> (Memory.Addr8, Memory.Addr8, Memory.Addr8) -> State.State Memory.RAM512 [Bool]
+runRam512 inputs load address = do
+    Memory.ram512 inputs load address
+
+testRam512AAAKeep :: HUnit.Test
+testRam512AAAKeep = let
+    gen                                              = Random.mkStdGen 1
+    (inputs, nextG)                                  = genRandomBitArray gen
+    (currentState, _)                                = genRandomRam512 nextG
+    (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = currentState
+    (a, b, c, d, e, f, g, h)                         = ramA
+    (a', b', c', d', e', f', g', h')                 = a
+    expected                                         = (a', (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH))
+    load                                             = False
+    address                                          = ((False, False, False), (False, False, False), (False, False, False))
+    result                                           = State.runState (runRam512 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram512 should validate for aaa keep" expected result)
+
+testRam512DBCKeep :: HUnit.Test
+testRam512DBCKeep = let
+    gen                                              = Random.mkStdGen 1
+    (inputs, nextG)                                  = genRandomBitArray gen
+    (currentState, _)                                = genRandomRam512 nextG
+    (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = currentState
+    (a, b, c, d, e, f, g, h)                         = ramD
+    (a', b', c', d', e', f', g', h')                 = b
+    expected                                         = (c', (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH))
+    load                                             = False
+    address                                          = ((False, True, True), (False, False, True), (False, True, False))
+    result                                           = State.runState (runRam512 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram512 should validate for dbc keep" expected result)
+
+testRam512DBCLoad :: HUnit.Test
+testRam512DBCLoad = let
+    gen                                              = Random.mkStdGen 1
+    (inputs, nextG)                                  = genRandomBitArray gen
+    (currentState, _)                                = genRandomRam512 nextG
+    (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = currentState
+    (a, b, c, d, e, f, g, h)                         = ramD
+    (a', b', c', d', e', f', g', h')                 = b
+    newRamB                                          = (a', b', inputs, d', e', f', g', h')
+    newRamD                                          = (a, newRamB, c, d, e, f, g, h)
+    expected                                         = (c', (ramA, ramB, ramC, newRamD, ramE, ramF, ramG, ramH))
+    load                                             = True
+    address                                          = ((False, True, True), (False, False, True), (False, True, False))
+    result                                           = State.runState (runRam512 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram512 should validate for dbc load" expected result)
+
+testRam512HGBKeep :: HUnit.Test
+testRam512HGBKeep = let
+    gen                                              = Random.mkStdGen 1
+    (inputs, nextG)                                  = genRandomBitArray gen
+    (currentState, _)                                = genRandomRam512 nextG
+    (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = currentState
+    (a, b, c, d, e, f, g, h)                         = ramH
+    (a', b', c', d', e', f', g', h')                 = g
+    expected                                         = (b', (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH))
+    load                                             = False
+    address                                          = ((True, True, True), (True, True, False), (False, False, True))
+    result                                           = State.runState (runRam512 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram512 should validate for dbc keep" expected result)
+
+testRam512HGBLoad :: HUnit.Test
+testRam512HGBLoad = let
+    gen                                              = Random.mkStdGen 1
+    (inputs, nextG)                                  = genRandomBitArray gen
+    (currentState, _)                                = genRandomRam512 nextG
+    (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = currentState
+    (a, b, c, d, e, f, g, h)                         = ramH
+    (a', b', c', d', e', f', g', h')                 = g
+    newRamG                                          = (a', inputs, c', d', e', f', g', h')
+    newRamH                                          = (a, b, c, d, e, f, newRamG, h)
+    expected                                         = (b', (ramA, ramB, ramC, ramD, ramE, ramF, ramG, newRamH))
+    load                                             = True
+    address                                          = ((True, True, True), (True, True, False), (False, False, True))
+    result                                           = State.runState (runRam512 inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram512 should validate for dbc load" expected result)
 
 memoryTests :: [HUnit.Test]
 memoryTests = [dffZeroOutOneInTest
@@ -295,4 +372,9 @@ memoryTests = [dffZeroOutOneInTest
               ,testRam64AAKeep
               ,testRam64DBLoad
               ,testRam64HELoad
-              ,testRam64HEKeep]
+              ,testRam64HEKeep
+              ,testRam512AAAKeep
+              ,testRam512DBCKeep
+              ,testRam512DBCLoad
+              ,testRam512HGBKeep
+              ,testRam512HGBLoad]
