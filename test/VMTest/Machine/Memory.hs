@@ -337,7 +337,7 @@ testRam512HGBKeep = let
     load                                             = False
     address                                          = ((True, True, True), (True, True, False), (False, False, True))
     result                                           = State.runState (runRam512 inputs load address) currentState
-    in (HUnit.TestCase $ HUnit.assertEqual "ram512 should validate for dbc keep" expected result)
+    in (HUnit.TestCase $ HUnit.assertEqual "ram512 should validate for hgb keep" expected result)
 
 testRam512HGBLoad :: HUnit.Test
 testRam512HGBLoad = let
@@ -353,7 +353,28 @@ testRam512HGBLoad = let
     load                                             = True
     address                                          = ((True, True, True), (True, True, False), (False, False, True))
     result                                           = State.runState (runRam512 inputs load address) currentState
-    in (HUnit.TestCase $ HUnit.assertEqual "ram512 should validate for dbc load" expected result)
+    in (HUnit.TestCase $ HUnit.assertEqual "ram512 should validate for hgb load" expected result)
+
+
+
+runRam4K :: [Bool] -> Bool -> (Memory.Addr8, Memory.Addr8, Memory.Addr8, Memory.Addr8) -> State.State Memory.RAM4K [Bool]
+runRam4K inputs load address = do
+    Memory.ram4K inputs load address
+
+testRam4KAAAAKeep :: HUnit.Test
+testRam4KAAAAKeep = let
+    gen                                              = Random.mkStdGen 1
+    (inputs, nextG)                                  = genRandomBitArray gen
+    (currentState, _)                                = genRandomRam4K nextG
+    (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = currentState
+    (a, b, c, d, e, f, g, h)                         = ramA
+    (a', b', c', d', e', f', g', h')                 = a
+    (a'', b'', c'', d'', e'', f'', g'', h'')         = a'
+    expected                                         = (a'', (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH))
+    load                                             = False
+    address                                          = ((False, False, False), (False, False, False), (False, False, False), (False, False, False))
+    result                                           = State.runState (runRam4K inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram512 should validate for aaa keep" expected result)
 
 memoryTests :: [HUnit.Test]
 memoryTests = [dffZeroOutOneInTest
@@ -377,4 +398,5 @@ memoryTests = [dffZeroOutOneInTest
               ,testRam512DBCKeep
               ,testRam512DBCLoad
               ,testRam512HGBKeep
-              ,testRam512HGBLoad]
+              ,testRam512HGBLoad
+              ,testRam4KAAAAKeep]
