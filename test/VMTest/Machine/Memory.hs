@@ -165,10 +165,14 @@ genRandomBit g = let
     v                  = randomInt `mod` 2 == 0
     in ((v, nextG))
 
-genRandom8 :: Random.StdGen -> (Random.StdGen -> (a, Random.StdGen)) -> ([a], Random.StdGen)
-genRandom8 g f = let
+
+genRandomN :: Int -> Random.StdGen -> (Random.StdGen -> (a, Random.StdGen)) -> ([a], Random.StdGen)
+genRandomN n g f = let
     fn        = \_ (xs, curG) -> let (x, nextG) = (f curG) in ((x:xs), nextG)
-    in (foldr fn ([], g) (take 8 (repeat ([], g))))
+    in (foldr fn ([], g) (take n (repeat ([], g))))
+
+genRandom8 :: Random.StdGen -> (Random.StdGen -> (a, Random.StdGen)) -> ([a], Random.StdGen)
+genRandom8 g f = genRandomN 8 g f
 
 genRandom8Tuple :: Random.StdGen -> (Random.StdGen -> (a, Random.StdGen)) -> ((a, a, a, a, a, a, a, a), Random.StdGen)
 genRandom8Tuple g f = let
