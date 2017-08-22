@@ -202,6 +202,9 @@ genRandomRam512 g = genRandom8Tuple g genRandomRam64
 genRandomRam4K :: Random.StdGen -> (Memory.RAM4K, Random.StdGen)
 genRandomRam4K g = genRandom8Tuple g genRandomRam512
 
+genRandomRam16K :: Random.StdGen -> (Memory.RAM16K, Random.StdGen)
+genRandomRam16K g = genRandom4Tuple g genRandomRam4K
+
 runRam64 :: [Bool] -> Bool -> (Memory.Addr8, Memory.Addr8) -> State.State Memory.RAM64 [Bool]
 runRam64 inputs load address = do
     Memory.ram64 inputs load address
