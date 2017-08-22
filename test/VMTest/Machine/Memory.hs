@@ -174,6 +174,14 @@ genRandomN n g f = let
 genRandom8 :: Random.StdGen -> (Random.StdGen -> (a, Random.StdGen)) -> ([a], Random.StdGen)
 genRandom8 g f = genRandomN 8 g f
 
+genRandom4 :: Random.StdGen -> (Random.StdGen -> (a, Random.StdGen)) -> ([a], Random.StdGen)
+genRandom4 g f = genRandomN 4 g f
+
+genRandom4Tuple :: Random.StdGen -> (Random.StdGen -> (a, Random.StdGen)) -> ((a, a, a, a), Random.StdGen)
+genRandom4Tuple g f = let
+    (l, nextG) = genRandom4 g f
+    in ((l !! 0, l !! 1, l !! 0, l !! 0), nextG)
+
 genRandom8Tuple :: Random.StdGen -> (Random.StdGen -> (a, Random.StdGen)) -> ((a, a, a, a, a, a, a, a), Random.StdGen)
 genRandom8Tuple g f = let
     (l, nextG) = genRandom8 g f
