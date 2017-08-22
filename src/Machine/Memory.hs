@@ -5,7 +5,14 @@ module Machine.Memory (dff
                       ,ram8
                       ,RAM64
                       ,ram64
-                      ,Addr8) where
+                      ,Addr8
+                      ,Addr4
+                      ,RAM512
+                      ,ram512
+                      ,RAM4K
+                      ,ram4K
+                      ,RAM16K
+                      ,ram16K) where
 
 import qualified Control.Monad.State as State
 import qualified Machine.Gates       as Gates
