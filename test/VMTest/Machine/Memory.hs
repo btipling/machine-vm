@@ -405,7 +405,7 @@ testRam4KCFABLoad = let
     load                                             = True
     address                                          = ((False, True, False), (True, False, True), (False, False, False), (False, False, True))
     result                                           = State.runState (runRam4K inputs load address) currentState
-    in (HUnit.TestCase $ HUnit.assertEqual "ram4k should validate for cfab keep" expected result)
+    in (HUnit.TestCase $ HUnit.assertEqual "ram4k should validate for cfab load" expected result)
 
 runRam16K :: [Bool] -> Bool -> (Memory.Addr4, Memory.Addr8, Memory.Addr8, Memory.Addr8, Memory.Addr8) -> State.State Memory.RAM16K [Bool]
 runRam16K inputs load address = do
@@ -425,7 +425,43 @@ testRam16KAAAAAKeep = let
     load                                             = False
     address                                          = ((False, False), (False, False, False), (False, False, False), (False, False, False), (False, False, False))
     result                                           = State.runState (runRam16K inputs load address) currentState
-    in (HUnit.TestCase $ HUnit.assertEqual "ram4k should validate for aaaa keep" expected result)
+    in (HUnit.TestCase $ HUnit.assertEqual "ram16k should validate for aaaaa keep" expected result)
+
+testRam16KDBFHFKeep :: HUnit.Test
+testRam16KDBFHFKeep = let
+    gen                                              = Random.mkStdGen 1
+    (inputs, nextG)                                  = genRandomBitArray gen
+    (currentState, _)                                = genRandomRam16K nextG
+    (ram16KA, ram16KB, ram16KC, ram16KD)             = currentState
+    (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = ram16KD
+    (a, b, c, d, e, f, g, h)                         = ramB
+    (a', b', c', d', e', f', g', h')                 = f
+    (a'', b'', c'', d'', e'', f'', g'', h'')         = h'
+    expected                                         = (f'', (ram16KA, ram16KB, ram16KC, ram16KD))
+    load                                             = False
+    address                                          = ((True, True), (False, False, True), (True, False, True), (True, True, True), (True, False, True))
+    result                                           = State.runState (runRam16K inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram16k should validate for dbfhf keep" expected result)
+
+testRam16KDBFHFLoad :: HUnit.Test
+testRam16KDBFHFLoad = let
+    gen                                              = Random.mkStdGen 1
+    (inputs, nextG)                                  = genRandomBitArray gen
+    (currentState, _)                                = genRandomRam16K nextG
+    (ram16KA, ram16KB, ram16KC, ram16KD)             = currentState
+    (ramA, ramB, ramC, ramD, ramE, ramF, ramG, ramH) = ram16KD
+    (a, b, c, d, e, f, g, h)                         = ramB
+    (a', b', c', d', e', f', g', h')                 = f
+    (a'', b'', c'', d'', e'', f'', g'', h'')         = h'
+    newRamH                                          = (a'', b'', c'', d'', e'', inputs, g'', h'')
+    newRamF                                          = (a', b', c', d', e', f', g', newRamH)
+    newRamB                                          = (a, b, c, d, e, newRamF, g, h)
+    newRam16KD                                       = (ramA, newRamB, ramC, ramD, ramE, ramF, ramG, ramH)
+    expected                                         = (f'', (ram16KA, ram16KB, ram16KC, newRam16KD))
+    load                                             = True
+    address                                          = ((True, True), (False, False, True), (True, False, True), (True, True, True), (True, False, True))
+    result                                           = State.runState (runRam16K inputs load address) currentState
+    in (HUnit.TestCase $ HUnit.assertEqual "ram16k should validate for dbfhf load" expected result)
 
 memoryTests :: [HUnit.Test]
 memoryTests = [dffZeroOutOneInTest
@@ -452,4 +488,6 @@ memoryTests = [dffZeroOutOneInTest
               ,testRam512HGBLoad
               ,testRam4KAAAAKeep
               ,testRam4KCFABLoad
-              ,testRam16KAAAAAKeep]
+              ,testRam16KAAAAAKeep
+              ,testRam16KDBFHFKeep
+              ,testRam16KDBFHFLoad]
